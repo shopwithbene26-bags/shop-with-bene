@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only the shop owner's login can manage bags and orders.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'f4Idl32IvgW9u1ALD7pfkxTI8eF2';
+    }
+
+    // A customer may change a bag's stock only as part of a real order:
+    //  1) placing a new order lowers stock by exactly the quantity in that order, or
+    //  2) declining a delivery fee raises stock by exactly that order's quantity.
+    function stockChangeMatchesOrder() {
+      let oid  = request.resource.data.lastOrderId;
+      let ord  = /databases/$(database)/documents/orders/$(oid);
+      let diff = request.resource.data.stock - resource.data.stock;
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'lastOrderId'])
+        && request.resource.data.stock is int
+        && request.resource.data.stock >= 0
+        && (
+          ( !exists(ord) && existsAfter(ord)
+            && diff < 0 && diff == -getAfter(ord).data.itemQty[resource.id] )
+          ||
+          ( exists(ord) && get(ord).data.status == 'fee_offered'
+            && getAfter(ord).data.status == 'cancelled'
+            && diff > 0 && diff == get(ord).data.itemQty[resource.id] )
+        );
+    }
+
+    // The only changes a customer may make to their own order.
+    function customerOrderUpdate() {
+      let before  = resource.data;
+      let after   = request.resource.data;
+      let changed = after.diff(before).affectedKeys();
+      return
+        // accept the delivery fee
+        ( before.status == 'fee_offered' && after.status == 'awaiting_payment'
+          && changed.hasOnly(['status']) )
+        ||
+        // decline the delivery fee
+        ( before.status == 'fee_offered' && after.status == 'cancelled'
+          && changed.hasOnly(['status', 'cancelledBy']) && after.cancelledBy == 'customer' )
+        ||
+        // submit the name on the MoMo account used to pay
+        ( before.status == 'awaiting_payment' && after.status == 'payment_submitted'
+          && changed.hasOnly(['status', 'momoName'])
+          && after.momoName is string && after.momoName.size() > 0 && after.momoName.size() <= 80 );
+    }
+
+    function validNewOrder() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['items', 'itemQty', 'subtotal', 'mode', 'name', 'callPhone', 'waPhone',
+                               'location', 'deliveryFee', 'status', 'paid', 'momoName', 'createdAt'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+        && d.callPhone is string && d.callPhone.matches('^233[0-9]{9}$')
+        && d.waPhone is string && d.waPhone.matches('^233[0-9]{9}$')
+        && d.items is list && d.items.size() >= 1 && d.items.size() <= 20
+        && d.itemQty is map
+        && d.subtotal is number && d.subtotal > 0
+        && d.paid == false && d.momoName == ''
+        && d.createdAt == request.time
+        && d.location is string && d.location.size() <= 200
+        && d.deliveryFee == null
+        && ( (d.mode == 'delivery' && d.status == 'awaiting_fee' && d.location.size() > 0)
+          || (d.mode == 'pickup'   && d.status == 'awaiting_payment') );
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || stockChangeMatchesOrder();
+    }
+
+    match /orders/{orderId} {
+      allow get: if true;            // the order link's long random ID acts as the key
+      allow list: if isAdmin();      // only you can see the full list of orders
+      allow create: if validNewOrder();
+      allow update: if isAdmin() || customerOrderUpdate();
+      allow delete: if isAdmin();
+    }
+  }
+}

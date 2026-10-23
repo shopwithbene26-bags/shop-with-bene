@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Shop with Bene · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ivory:#FBF7F2;--blush:#F3DDD6;--plum:#5B2A3C;--gold:#B8925A;--ink:#2B2326;--line:#E8DAD2}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{font-family:Inter,system-ui,sans-serif;background:var(--ivory);color:var(--ink);line-height:1.5}
+h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--plum)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px 60px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--plum);color:#fff;text-decoration:none;display:inline-block;font-size:.92rem}
+.btn.alt{background:var(--blush);color:var(--plum)}
+.btn.red{background:#fff;color:#a33;border:1px solid #d9a5a5}
+.btn:disabled{opacity:.5}
+.btn:focus-visible,.in:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.in{padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;width:100%;margin:4px 0}
+.tabs{display:flex;gap:8px;margin:12px 0}
+.tabs .btn{flex:1;background:#fff;color:var(--plum);border:1px solid var(--plum)}
+.tabs .btn.on{background:var(--plum);color:#fff}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.card.old{border-color:var(--gold);box-shadow:0 0 0 2px #f1e3c9}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sp{justify-content:space-between}
+.badge{background:var(--blush);color:var(--plum);border-radius:20px;padding:3px 11px;font-size:.82rem;font-weight:600}
+.badge.hot{background:var(--plum);color:#fff}
+.thumbs{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+.thumbs div{position:relative}
+.thumbs img{width:54px;height:68px;object-fit:cover;border-radius:8px;display:block}
+.thumbs span{position:absolute;right:2px;bottom:2px;background:var(--ink);color:#fff;font-size:.72rem;border-radius:10px;padding:0 6px}
+.muted{color:#6b5a60;font-size:.88rem}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.acts .in{width:130px;margin:0}
+.bags{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.bags img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px}
+.bags .card{margin:0}
+.login{max-width:360px;margin:12vh auto;padding:0 16px;text-align:center}
+.login .btn{width:100%;margin-top:8px}
+.err{color:#a33;font-size:.9rem;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <h1>Shop with Bene</h1><p class="muted" style="margin-bottom:14px">Admin sign in</p>
+  <input class="in" id="em" type="email" placeholder="Email" autocomplete="username">
+  <input class="in" id="pw" type="password" placeholder="Password" autocomplete="current-password">
+  <button class="btn" id="signin">Sign in</button><p class="err" id="err"></p>
+</div>
+
+<div id="app" hidden>
+  <div class="top"><h1 style="font-size:1.4rem">Shop with Bene</h1>
+    <div class="row"><button class="btn alt" id="snd">Turn on alert sound</button><button class="btn alt" id="out">Sign out</button></div></div>
+  <div class="wrap">
+    <div class="tabs"><button class="btn on" id="t1">Orders</button><button class="btn" id="t2">Bags</button></div>
+
+    <section id="orders">
+      <div class="row"><button class="btn alt" id="fo">Open orders</button><button class="btn alt" id="fd">Finished orders</button></div>
+      <p class="err" id="oerr"></p><div id="olist"></div>
+    </section>
+
+    <section id="bagsec" hidden>
+      <div class="card"><h2 style="font-size:1.2rem">Add a bag</h2>
+        <input class="in" id="nf" type="file" accept="image/*">
+        <div class="row"><input class="in" id="np" type="number" min="0" step="0.01" placeholder="Price (GH₵)" style="flex:1"><input class="in" id="ns" type="number" min="0" step="1" placeholder="Stock" style="flex:1"></div>
+        <button class="btn" id="add" style="margin-top:6px">Add bag</button><p class="muted" id="amsg"></p></div>
+      <div class="row sp"><h2 style="font-size:1.2rem">Your bags</h2><button class="btn red" id="clr">Clear sold-out bags</button></div>
+      <div class="bags" id="blist" style="margin-top:12px"></div>
+    </section>
+  </div>
+</div>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,collection,doc,onSnapshot,addDoc,updateDoc,deleteDoc,runTransaction,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {firebaseConfig,SHOP} from './config.js';
+
+const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app);
+const $=s=>document.querySelector(s);
+const cur=n=>SHOP.currency+Number(n).toFixed(2).replace(/\.00$/,'');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const OPEN=['awaiting_fee','fee_offered','awaiting_payment','payment_submitted','paid'];
+const LABEL={awaiting_fee:'Needs delivery fee',fee_offered:'Waiting for customer to accept fee',awaiting_payment:'Waiting for payment',payment_submitted:'Check payment',paid:'Paid, ready to serve',served:'Served',cancelled:'Cancelled'};
+const now=()=>Date.now()/1000;
+const ago=s=>{const m=Math.floor((now()-s)/60);return m<60?Math.max(m,0)+' min':m<1440?Math.floor(m/60)+' hours':Math.floor(m/1440)+' days'};
+
+let orders=[],products={},seen=null,unsubs=[],view='open';
+
+/* ----- Sound ----- */
+let ctx;
+function beep(){if(!ctx)return;[0,.3,.6].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;
+  g.gain.setValueAtTime(.25,ctx.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d+.22);o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+.24)})}
+$('#snd').onclick=()=>{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();ctx.resume();beep();$('#snd').textContent='Alert sound is on'};
+
+/* ----- Auth ----- */
+onAuthStateChanged(auth,u=>{
+  $('#login').hidden=!!u;$('#app').hidden=!u;
+  unsubs.forEach(f=>f());unsubs=[];
+  if(u)start();
+});
+$('#signin').onclick=async()=>{try{await signInWithEmailAndPassword(auth,$('#em').value.trim(),$('#pw').value);$('#err').textContent=''}catch(e){$('#err').textContent='Email or password is not correct.'}};
+$('#out').onclick=()=>signOut(auth);
+
+function start(){
+  seen=null;
+  unsubs.push(onSnapshot(collection(db,'orders'),s=>{
+    orders=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||now())-(a.createdAt?.seconds||now()));
+    const next={};let ring=false;
+    orders.forEach(o=>{next[o.id]=o.status;
+      if(seen){const p=seen[o.id];
+        if(!p||(p!==o.status&&(o.status==='payment_submitted'||(p==='fee_offered'&&o.status==='awaiting_payment'))))ring=true}});
+    seen=next;if(ring)beep();
+    $('#oerr').textContent='';renderOrders();renderBags();
+  },e=>$('#oerr').textContent='Could not load orders: '+e.message));
+  unsubs.push(onSnapshot(collection(db,'products'),s=>{products={};s.forEach(d=>products[d.id]=d.data());renderBags()}));
+}
+
+/* ----- Tabs ----- */
+const tab=n=>{$('#orders').hidden=n!==1;$('#bagsec').hidden=n!==2;$('#t1').classList.toggle('on',n===1);$('#t2').classList.toggle('on',n===2)};
+$('#t1').onclick=()=>tab(1);$('#t2').onclick=()=>tab(2);
+$('#fo').onclick=()=>{view='open';renderOrders()};$('#fd').onclick=()=>{view='done';renderOrders()};
+
+/* ----- Orders ----- */
+const link=id=>new URL('./?order='+id,location.href).href;
+const waUrl=(o,txt)=>'https://wa.me/'+o.waPhone+'?text='+encodeURIComponent(txt);
+function msgFor(o){
+  const code=o.id.slice(0,6).toUpperCase();
+  if(o.status==='fee_offered')return `Hello ${o.name}, thank you for ordering from Shop with Bene. Your delivery fee to ${o.location} is ${cur(o.deliveryFee)}. Please open your order to accept it: ${link(o.id)}`;
+  return `Hello ${o.name}, this is Shop with Bene about your order ${code}. You can see it here: ${link(o.id)}`;
+}
+function renderOrders(){
+  const list=orders.filter(o=>(view==='open')===OPEN.includes(o.status));
+  const n=orders.filter(o=>OPEN.includes(o.status)).length;
+  $('#fo').textContent=`Open orders (${n})`;$('#t1').textContent=`Orders (${n})`;
+  const keep={};document.querySelectorAll('[data-fee]').forEach(i=>keep[i.dataset.fee]=i.value);
+  $('#olist').innerHTML=list.length?list.map(o=>{
+    const open=OPEN.includes(o.status), old=open&&o.status!=='paid'&&now()-(o.createdAt?.seconds||now())>86400;
+    const total=o.subtotal+(o.deliveryFee||0), code=o.id.slice(0,6).toUpperCase();
+    let a='';
+    if(o.status==='awaiting_fee')a=`<input class="in" type="number" min="0" step="0.01" placeholder="Fee (GH₵)" data-fee="${o.id}" value="${esc(keep[o.id]||'')}"><button class="btn" data-sendfee="${o.id}">Send fee</button>`;
+    if(o.status==='fee_offered')a=`<a class="btn alt" target="_blank" rel="noopener" href="${waUrl(o,msgFor(o))}">Message customer about fee</a>`;
+    if(o.status==='payment_submitted'||o.status==='awaiting_payment')a=`<button class="btn" data-paid="${o.id}" ${o.status==='awaiting_payment'?'disabled title="Customer has not submitted a payment name yet"':''}>Mark paid ✓</button>`;
+    if(o.status==='paid')a=`<button class="btn" data-served="${o.id}">Mark served</button>`;
+    if(open)a+=`<button class="btn red" data-cancel="${o.id}">Cancel order</button>`;
+    return `<div class="card ${old?'old':''}">
+      <div class="row sp"><b>${esc(o.name)} · ${code}</b><span class="badge ${o.status==='payment_submitted'||o.status==='awaiting_fee'?'hot':''}">${LABEL[o.status]}</span></div>
+      <p class="muted">${o.mode==='delivery'?'Delivery to '+esc(o.location):'Pickup at '+esc(SHOP.pickup)} · ${o.createdAt?ago(o.createdAt.seconds)+' ago':'just now'}${old?' · waiting more than a day':''}</p>
+      <div class="thumbs">${o.items.map(i=>`<div><img src="${esc(i.imageUrl)}" alt="Bag"><span>×${i.qty}</span></div>`).join('')}</div>
+      <p>Bags ${cur(o.subtotal)}${o.mode==='delivery'?' · Delivery '+(o.deliveryFee!=null?cur(o.deliveryFee):'not set'):''} · <b>Total ${cur(total)}</b></p>
+      ${o.momoName?`<p>MoMo name given: <b>${esc(o.momoName)}</b></p>`:''}
+      <div class="acts"><a class="btn alt" href="tel:+${o.callPhone}">Call +${o.callPhone}</a><a class="btn alt" target="_blank" rel="noopener" href="${waUrl(o,msgFor(o))}">WhatsApp +${o.waPhone}</a></div>
+      <div class="acts">${a}</div></div>`}).join(''):`<p class="muted" style="margin-top:20px">${view==='open'?'No open orders right now.':'No finished orders yet.'}</p>`;
+}
+async function restock(id,newStatus,by){
+  const ref=doc(db,'orders',id);
+  await runTransaction(db,async t=>{
+    const od=await t.get(ref),d=od.data();if(!OPEN.includes(d.status))return;
+    const ps=await Promise.all(d.items.map(i=>t.get(doc(db,'products',i.productId))));
+    ps.forEach((p,k)=>{if(p.exists())t.update(p.ref,{stock:p.data().stock+d.items[k].qty})});
+    t.update(ref,{status:newStatus,cancelledBy:by});
+  });
+}
+document.addEventListener('click',async e=>{
+  const d=e.target.dataset;if(!d)return;
+  try{
+    if(d.sendfee){const v=parseFloat(document.querySelector(`[data-fee="${d.sendfee}"]`).value);
+      if(!(v>=0))return alert('Enter the delivery fee first.');
+      await updateDoc(doc(db,'orders',d.sendfee),{deliveryFee:v,status:'fee_offered'});
+      const o=orders.find(x=>x.id===d.sendfee);if(o)window.open(waUrl(o,msgFor({...o,deliveryFee:v,status:'fee_offered'})),'_blank')}
+    if(d.paid)await updateDoc(doc(db,'orders',d.paid),{status:'paid',paid:true});
+    if(d.served)await updateDoc(doc(db,'orders',d.served),{status:'served'});
+    if(d.cancel&&confirm('Cancel this order and put the bags back in stock?'))await restock(d.cancel,'cancelled','admin');
+    if(d.save){const p=parseFloat($('#p-'+d.save).value),s=parseInt($('#s-'+d.save).value,10);
+      if(!(p>=0)||!(s>=0))return alert('Enter a valid price and stock.');await updateDoc(doc(db,'products',d.save),{price:p,stock:s})}
+    if(d.hide)await updateDoc(doc(db,'products',d.hide),{hidden:!products[d.hide].hidden});
+    if(d.del){if(inOpenOrder().has(d.del))return alert('This bag is in an open order. Finish or cancel that order first.');
+      if(confirm('Delete this bag from the shop?'))await deleteDoc(doc(db,'products',d.del))}
+  }catch(err){alert('That did not work: '+err.message)}
+});
+
+/* ----- Bags ----- */
+const inOpenOrder=()=>new Set(orders.filter(o=>OPEN.includes(o.status)).flatMap(o=>o.items.map(i=>i.productId)));
+function renderBags(){
+  const act=document.activeElement;if(act&&act.closest&&act.closest('#blist'))return;
+  const ids=Object.keys(products).sort((a,b)=>(products[b].createdAt?.seconds||now())-(products[a].createdAt?.seconds||now()));
+  const sold=ids.filter(i=>products[i].stock<1).length;
+  $('#clr').textContent=`Clear sold-out bags (${sold})`;$('#clr').disabled=!sold;
+  $('#blist').innerHTML=ids.length?ids.map(id=>{const p=products[id];return `<div class="card"><img src="${esc(p.imageUrl)}" alt="Bag">
+    <div class="row" style="margin:8px 0"><span class="badge">${p.stock<1?'Sold out':p.stock+' in stock'}</span>${p.hidden?'<span class="badge">Hidden</span>':''}</div>
+    <div class="row"><input class="in" id="p-${id}" type="number" step="0.01" value="${p.price}" aria-label="Price" style="flex:1"><input class="in" id="s-${id}" type="number" step="1" value="${p.stock}" aria-label="Stock" style="flex:1"></div>
+    <div class="acts"><button class="btn" data-save="${id}">Save</button><button class="btn alt" data-hide="${id}">${p.hidden?'Show':'Hide'}</button><button class="btn red" data-del="${id}">Delete</button></div></div>`}).join(''):'<p class="muted">No bags yet. Add your first one above.</p>';
+}
+$('#clr').onclick=async()=>{
+  const open=inOpenOrder(),ids=Object.keys(products).filter(i=>products[i].stock<1&&!open.has(i));
+  if(!ids.length)return alert('Nothing to clear. Sold-out bags in open orders are kept until those orders are finished.');
+  if(!confirm(`Delete ${ids.length} sold-out bag${ids.length>1?'s':''}?`))return;
+  try{await Promise.all(ids.map(i=>deleteDoc(doc(db,'products',i))))}catch(err){alert('That did not work: '+err.message)}
+};
+$('#add').onclick=async()=>{
+  const f=$('#nf').files[0],p=parseFloat($('#np').value),s=parseInt($('#ns').value,10),m=$('#amsg');
+  if(!f)return m.textContent='Choose a photo first.';
+  if(!(p>=0)||!(s>=0))return m.textContent='Enter a price and a stock count.';
+  $('#add').disabled=true;m.textContent='Uploading photo…';
+  try{
+    const fd=new FormData();fd.append('file',f);fd.append('upload_preset',SHOP.cloudinaryPreset);fd.append('folder','bags');
+    const r=await fetch(`https://api.cloudinary.com/v1_1/${SHOP.cloudinaryCloud}/image/upload`,{method:'POST',body:fd});
+    const j=await r.json();if(!j.secure_url)throw new Error(j.error?.message||'Upload failed');
+    await addDoc(collection(db,'products'),{imageUrl:j.secure_url.replace('/upload/','/upload/f_auto,q_auto,w_800/'),price:p,stock:s,hidden:false,createdAt:serverTimestamp()});
+    $('#nf').value='';$('#np').value='';$('#ns').value='';m.textContent='Bag added.';
+  }catch(err){m.textContent='Could not add the bag: '+err.message}
+  $('#add').disabled=false;
+};
+</script>
+</body>
+</html>

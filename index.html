@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop with Bene</title>
+<link rel="icon" href="logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ivory:#F8F1E5;--blush:#EBDCC3;--plum:#5E3B2A;--gold:#B08D4F;--ink:#2E2420;--line:#E6D7BE}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{font-family:Inter,system-ui,sans-serif;background:var(--ivory);color:var(--ink);line-height:1.5}
+h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--plum)}
+header{text-align:center;padding:30px 16px 20px;border-bottom:1px solid var(--line)}
+header h1{font-size:2.1rem}
+header p{color:var(--gold);font-size:.9rem}
+main{max-width:1000px;margin:0 auto;padding:20px 14px 110px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:16px}
+.card{background:#fff;border-radius:6px 22px 6px 22px;overflow:hidden;border:1px solid var(--line);position:relative}
+.card img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
+.card .b{padding:10px 12px 12px}
+.price{color:var(--gold);font-weight:600;font-size:1.05rem;margin-bottom:8px}
+.sold{position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;font-size:.75rem;padding:3px 10px;border-radius:20px}
+.btn{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--plum);color:#fff;width:100%;margin-top:6px}
+.btn.alt{background:var(--blush);color:var(--plum)}
+.logo{width:150px;height:150px;border-radius:50%;display:block;margin:0 auto}
+.vh{position:absolute;left:-9999px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.in:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(92%,520px);background:var(--plum);color:#fff;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(94,59,42,.3)}
+.sheet{position:fixed;inset:0;background:rgba(43,35,38,.5);display:flex;align-items:flex-end;justify-content:center;z-index:5}
+.pane{background:var(--ivory);width:min(100%,560px);max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.x{background:none;border:0;font-size:1.4rem;cursor:pointer;color:var(--plum)}
+.line{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.line img{width:56px;height:70px;object-fit:cover;border-radius:8px}
+.line .g{flex:1}
+.qty{display:flex;align-items:center;gap:10px}
+.qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--plum);background:#fff;color:var(--plum);font-size:1.1rem;cursor:pointer}
+.tot{display:flex;justify-content:space-between;padding:12px 0;font-weight:600}
+.in{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;margin:5px 0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.seg label{border:1px solid var(--plum);border-radius:10px;padding:10px;text-align:center;cursor:pointer;color:var(--plum);font-weight:600}
+.seg label:has(input:checked){background:var(--plum);color:#fff}
+.seg input{position:absolute;opacity:0}
+.chk{display:flex;gap:8px;align-items:center;font-size:.9rem;margin:6px 0}
+.note{font-size:.88rem;color:#6b5a60;margin:6px 0}
+.box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+.msg{background:var(--blush);border-radius:14px;padding:16px;margin:14px 0}
+.copy{display:flex;gap:8px;align-items:center;margin:8px 0}
+.copy b{font-size:1.25rem;letter-spacing:.05em}
+.copy button{width:auto;padding:8px 14px;margin:0}
+.empty{text-align:center;padding:50px 10px;color:#6b5a60}
+</style>
+</head>
+<body>
+<header><img class="logo" src="logo.jpeg" alt="Shop with Bene"><h1 class="vh">Shop with Bene</h1></header>
+
+<main id="shop"><div class="grid" id="grid"></div></main>
+<button class="bar" id="bar" hidden></button>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="pane">
+    <div class="row"><h2>Your cart</h2><button class="x" id="close" aria-label="Close cart">✕</button></div>
+    <div id="lines"></div>
+    <div class="tot"><span>Bags total</span><span id="sub"></span></div>
+    <div class="seg">
+      <label><input type="radio" name="mode" value="pickup" checked>Pickup</label>
+      <label><input type="radio" name="mode" value="delivery">Delivery</label>
+    </div>
+    <p class="note" id="pu"></p>
+    <input class="in" id="name" placeholder="Your name" autocomplete="name">
+    <input class="in" id="call" type="tel" placeholder="Phone number for calls" autocomplete="tel">
+    <label class="chk"><input type="checkbox" id="same" checked> My WhatsApp number is the same as my call number</label>
+    <input class="in" id="wa" type="tel" placeholder="Your WhatsApp number" hidden>
+    <div id="dl" hidden>
+      <input class="in" id="loc" placeholder="Your delivery location">
+      <p class="note">We'll set your delivery fee for this location, and you can accept or decline it before paying.</p>
+    </div>
+    <button class="btn" id="place">Place order</button>
+  </div>
+</div>
+
+<main id="order" hidden></main>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getFirestore,collection,doc,onSnapshot,runTransaction,serverTimestamp,updateDoc} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {firebaseConfig,SHOP} from './config.js';
+
+const db=getFirestore(initializeApp(firebaseConfig));
+const $=s=>document.querySelector(s);
+const cur=n=>SHOP.currency+Number(n).toFixed(2).replace(/\.00$/,'');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const intl=n=>{n=n.replace(/\D/g,'');return n.startsWith('233')?n:n.startsWith('0')?'233'+n.slice(1):n};
+const okPhone=n=>/^233\d{9}$/.test(intl(n));
+
+let products={}, cart={};
+try{cart=JSON.parse(localStorage.getItem('cart')||'{}')}catch(e){}
+const saveCart=()=>{try{localStorage.setItem('cart',JSON.stringify(cart))}catch(e){}};
+
+/* ---------- Shop ---------- */
+function renderShop(){
+  const list=Object.entries(products).filter(([,p])=>!p.hidden)
+    .sort((a,b)=>(b[1].createdAt?.seconds||0)-(a[1].createdAt?.seconds||0));
+  $('#grid').innerHTML=list.length?list.map(([id,p])=>`
+    <div class="card"><img src="${esc(p.imageUrl)}" alt="Bag" loading="lazy">
+    ${p.stock<1?'<span class="sold">Sold out</span>':''}
+    <div class="b"><div class="price">${cur(p.price)}</div>
+    <button class="btn" data-add="${id}" ${p.stock<1?'disabled':''}>${p.stock<1?'Sold out':'Add to cart'}</button></div></div>`).join('')
+    :'<p class="empty">New bags are on the way. Check back soon.</p>';
+  renderCart();
+}
+const lines=()=>Object.entries(cart).filter(([id])=>products[id]&&!products[id].hidden)
+  .map(([id,q])=>({id,p:products[id],q:Math.min(q,products[id].stock)})).filter(l=>l.q>0);
+const subtotal=()=>lines().reduce((a,l)=>a+l.p.price*l.q,0);
+
+function renderCart(){
+  const ls=lines(), n=ls.reduce((a,l)=>a+l.q,0);
+  $('#bar').hidden=!n||!!oid; $('#bar').textContent=`View cart (${n}) · ${cur(subtotal())}`;
+  $('#lines').innerHTML=ls.length?ls.map(l=>`<div class="line"><img src="${esc(l.p.imageUrl)}" alt="Bag">
+    <div class="g"><div class="price" style="margin:0">${cur(l.p.price)}</div></div>
+    <div class="qty"><button data-dec="${l.id}" aria-label="Fewer">−</button><span>${l.q}</span><button data-inc="${l.id}" aria-label="More">+</button></div></div>`).join('')
+    :'<p class="empty">Your cart is empty. Pick a bag to get started.</p>';
+  $('#sub').textContent=cur(subtotal()); $('#place').disabled=!ls.length;
+  if(!ls.length&&!$('#sheet').hidden&&!n) $('#sheet').hidden=true;
+}
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.dataset.add){cart[t.dataset.add]=Math.min((cart[t.dataset.add]||0)+1,products[t.dataset.add].stock);saveCart();renderCart()}
+  if(t.dataset.inc){cart[t.dataset.inc]=Math.min((cart[t.dataset.inc]||0)+1,products[t.dataset.inc].stock);saveCart();renderCart()}
+  if(t.dataset.dec){cart[t.dataset.dec]=Math.max((cart[t.dataset.dec]||0)-1,0);if(!cart[t.dataset.dec])delete cart[t.dataset.dec];saveCart();renderCart()}
+});
+$('#bar').onclick=()=>$('#sheet').hidden=false;
+$('#close').onclick=()=>$('#sheet').hidden=true;
+$('#pu').innerHTML=`Pick up at <b>${esc(SHOP.pickup)}</b>. Payment is by MoMo after you place your order.`;
+const mode=()=>document.querySelector('[name=mode]:checked').value;
+document.querySelectorAll('[name=mode]').forEach(r=>r.onchange=()=>{$('#dl').hidden=mode()!=='delivery';$('#pu').hidden=mode()!=='pickup'});
+$('#same').onchange=()=>$('#wa').hidden=$('#same').checked;
+
+$('#place').onclick=async()=>{
+  const name=$('#name').value.trim(), call=$('#call').value.trim(), wa=$('#same').checked?call:$('#wa').value.trim(), loc=$('#loc').value.trim(), m=mode();
+  if(!name) return alert('Please enter your name.');
+  if(!okPhone(call)) return alert('Please enter a valid phone number for calls, like 0244123456.');
+  if(!okPhone(wa)) return alert('Please enter a valid WhatsApp number, like 0244123456.');
+  if(m==='delivery'&&!loc) return alert('Please enter your delivery location.');
+  const ls=lines(); if(!ls.length) return;
+  const btn=$('#place'); btn.disabled=true; btn.textContent='Placing order…';
+  const oref=doc(collection(db,'orders'));
+  try{
+    await runTransaction(db,async t=>{
+      const snaps=await Promise.all(ls.map(l=>t.get(doc(db,'products',l.id))));
+      const items=snaps.map((s,i)=>{
+        if(!s.exists()||s.data().stock<ls[i].q) throw new Error('Sorry, a bag in your cart just sold out. Please check your cart.');
+        return {productId:s.id,imageUrl:s.data().imageUrl,price:s.data().price,qty:ls[i].q};
+      });
+      snaps.forEach((s,i)=>t.update(s.ref,{stock:s.data().stock-ls[i].q,lastOrderId:oref.id}));
+      t.set(oref,{items,subtotal:items.reduce((a,i)=>a+i.price*i.qty,0),mode:m,name,callPhone:intl(call),waPhone:intl(wa),
+        location:m==='delivery'?loc:'',deliveryFee:null,status:m==='delivery'?'awaiting_fee':'awaiting_payment',
+        paid:false,momoName:'',itemQty:Object.fromEntries(items.map(i=>[i.productId,i.qty])),createdAt:serverTimestamp()});
+    });
+    cart={};saveCart();location.href='?order='+oref.id;
+  }catch(e){alert(e.message||'Something went wrong. Please try again.');btn.disabled=false;btn.textContent='Place order'}
+};
+
+/* ---------- Order tracking ---------- */
+const oid=new URLSearchParams(location.search).get('order');
+const sumHtml=o=>{
+  const fee=o.mode==='delivery'&&o.deliveryFee!=null?o.deliveryFee:null;
+  return `<div class="box">${o.items.map(i=>`<div class="line"><img src="${esc(i.imageUrl)}" alt="Bag"><div class="g">${cur(i.price)} × ${i.qty}</div><b>${cur(i.price*i.qty)}</b></div>`).join('')}
+  <div class="tot"><span>Bags</span><span>${cur(o.subtotal)}</span></div>
+  ${o.mode==='delivery'?`<div class="tot"><span>Delivery to ${esc(o.location)}</span><span>${fee!=null?cur(fee):'To be confirmed'}</span></div>`:`<div class="tot"><span>Pickup</span><span>${esc(SHOP.pickup)}</span></div>`}
+  ${o.mode==='pickup'||fee!=null?`<div class="tot"><span>Total to pay</span><span>${cur(o.subtotal+(fee||0))}</span></div>`:''}</div>`;
+};
+function renderOrder(id,o){
+  const ref=doc(db,'orders',id), total=o.subtotal+(o.deliveryFee||0), code=id.slice(0,6).toUpperCase();
+  const wa='https://wa.me/'+SHOP.whatsapp+'?text='+encodeURIComponent(`Hello Shop with Bene, this is my order ${code}.\n`+o.items.map(i=>`Bag ${cur(i.price)} × ${i.qty}`).join('\n')+`\nBags: ${cur(o.subtotal)}`+(o.mode==='delivery'?`\nDelivery to ${o.location}: ${o.deliveryFee!=null?cur(o.deliveryFee):'to be confirmed'}`:`\nPickup at ${SHOP.pickup}`)+`\nName: ${o.name}\nOrder link: ${location.href}`);
+  let s='';
+  if(o.status==='awaiting_fee') s=`<div class="msg"><b>Order received.</b> We're working out the delivery fee for ${esc(o.location)}. Keep this page open, or we'll message you on WhatsApp when it's ready.</div>`;
+  if(o.status==='fee_offered') s=`<div class="msg"><b>Your delivery fee is ${cur(o.deliveryFee)}.</b> Accept the delivery fee to go ahead with your order, or decline the fee to cancel the order and keep your items in your cart.</div>
+    <button class="btn" id="acc">Accept fee and continue</button><button class="btn alt" id="dec">Decline fee and cancel order</button>`;
+  if(o.status==='awaiting_payment') s=`<div class="box"><h2>Pay with MoMo</h2><p class="note">Send <b>${cur(total)}</b> to this number:</p>
+    <div class="copy"><b id="mn">${esc(SHOP.momoNumber)}</b><button class="btn alt" id="cp">Copy</button></div>
+    <p class="note">The account name should show as <b>${esc(SHOP.momoName)}</b>.</p>
+    <input class="in" id="mname" placeholder="Name on the MoMo account you paid from">
+    <button class="btn" id="paid">I have paid</button></div>`;
+  if(o.status==='payment_submitted') s=`<div class="msg"><b>Thank you.</b> We're confirming your payment of ${cur(total)} from ${esc(o.momoName)}. This page updates as soon as it's confirmed.</div>`;
+  if(o.status==='paid') s=`<div class="msg"><b>Payment confirmed.</b> Your order is being prepared${o.mode==='delivery'?' for delivery':' for pickup'}.</div>`;
+  if(o.status==='served') s=`<div class="msg"><b>Order complete.</b> Thank you for shopping with Bene.</div>`;
+  if(o.status==='cancelled') s=`<div class="msg"><b>This order was cancelled.</b></div><a href="./"><button class="btn">Back to the shop</button></a>`;
+  $('#order').innerHTML=`<h2>Order ${code}</h2>${s}${sumHtml(o)}<a href="${wa}" target="_blank" rel="noopener"><button class="btn alt">Send order summary on WhatsApp</button></a>`;
+  const on=(i,f)=>{const el=$('#'+i);if(el)el.onclick=f};
+  on('cp',()=>{navigator.clipboard?.writeText(SHOP.momoNumber);$('#cp').textContent='Copied'});
+  on('acc',()=>updateDoc(ref,{status:'awaiting_payment'}));
+  on('paid',()=>{const n=$('#mname').value.trim();if(!n)return alert('Please enter the name on the MoMo account you paid from.');updateDoc(ref,{momoName:n,status:'payment_submitted'})});
+  on('dec',async()=>{
+    await runTransaction(db,async t=>{
+      const od=await t.get(ref); if(od.data().status!=='fee_offered') return;
+      const ps=await Promise.all(od.data().items.map(i=>t.get(doc(db,'products',i.productId))));
+      ps.forEach((p,k)=>{if(p.exists())t.update(p.ref,{stock:p.data().stock+od.data().items[k].qty,lastOrderId:id})});
+      t.update(ref,{status:'cancelled',cancelledBy:'customer'});
+    });
+    o.items.forEach(i=>cart[i.productId]=(cart[i.productId]||0)+i.qty);saveCart();location.href='./';
+  });
+}
+
+/* ---------- Start ---------- */
+if(oid){
+  $('#shop').hidden=true;$('#order').hidden=false;
+  onSnapshot(doc(db,'orders',oid),s=>{
+    if(s.exists()) renderOrder(oid,s.data());
+    else $('#order').innerHTML='<p class="empty">We could not find this order. Check the link and try again.</p>';
+  });
+}
+onSnapshot(collection(db,'products'),s=>{products={};s.forEach(d=>products[d.id]=d.data());renderShop()});
+</script>
+</body>
+</html>
