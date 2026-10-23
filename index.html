@@ -16,7 +16,7 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--plum)}
 header{text-align:center;padding:30px 16px 20px;border-bottom:1px solid var(--line)}
 header h1{font-size:2.1rem}
 header p{color:var(--gold);font-size:.9rem}
-main{max-width:1000px;margin:0 auto;padding:20px 14px 110px}
+main{max-width:1000px;margin:0 auto;padding:20px 14px 30px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:16px}
 .card{background:#fff;border-radius:6px 22px 6px 22px;overflow:hidden;border:1px solid var(--line);position:relative}
 .card img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block}
@@ -53,6 +53,10 @@ main{max-width:1000px;margin:0 auto;padding:20px 14px 110px}
 .copy b{font-size:1.25rem;letter-spacing:.05em}
 .copy button{width:auto;padding:8px 14px;margin:0}
 .empty{text-align:center;padding:50px 10px;color:#6b5a60}
+footer{text-align:center;padding:24px 16px 100px;border-top:1px solid var(--line);color:#6b5a60;font-size:.92rem}
+footer .links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+footer a{color:var(--plum);font-weight:600;text-decoration:none;border:1px solid var(--plum);border-radius:20px;padding:8px 14px}
+footer a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -84,6 +88,7 @@ main{max-width:1000px;margin:0 auto;padding:20px 14px 110px}
 </div>
 
 <main id="order" hidden></main>
+<footer><p>Quality bags, classy styles, just for you.</p><div class="links" id="ft"></div></footer>
 
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -205,6 +210,10 @@ function renderOrder(id,o){
     o.items.forEach(i=>cart[i.productId]=(cart[i.productId]||0)+i.qty);saveCart();location.href='./';
   });
 }
+
+/* ---------- Footer ---------- */
+const local=n=>'0'+n.replace(/^233/,'');
+$('#ft').innerHTML=`<a href="https://wa.me/${SHOP.whatsapp}" target="_blank" rel="noopener">WhatsApp ${local(SHOP.whatsapp)}</a><a href="tel:+233${SHOP.callLine.slice(1)}">Call ${esc(SHOP.callLine)}</a><a href="https://www.snapchat.com/add/${esc(SHOP.snapchat)}" target="_blank" rel="noopener">Snapchat ${esc(SHOP.snapchat)}</a>`;
 
 /* ---------- Start ---------- */
 if(oid){

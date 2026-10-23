@@ -14,6 +14,8 @@ export const SHOP = {
   momoNumber: "0552645959",
   momoName: "Benedicta Agyin",
   pickup: "Dansoman-Asoredanho",
+  callLine: "0535533809",
+  snapchat: "theyluvv_bene",
   currency: "GH₵",
   cloudinaryCloud: "qbhs0saw",       // used by the admin page for photo uploads
   cloudinaryPreset: "bags_unsigned"
