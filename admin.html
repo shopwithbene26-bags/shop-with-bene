@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Shop with Bene · Admin</title>
+<link rel="icon" href="logo.jpeg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--ivory:#FBF7F2;--blush:#F3DDD6;--plum:#5B2A3C;--gold:#B8925A;--ink:#2B2326;--line:#E8DAD2}
+:root{--ivory:#F8F1E5;--blush:#EBDCC3;--plum:#5E3B2A;--gold:#9C7A3C;--ink:#2E2420;--line:#E6D7BE}
 *{box-sizing:border-box;margin:0}
 [hidden]{display:none!important}
 body{font-family:Inter,system-ui,sans-serif;background:var(--ivory);color:var(--ink);line-height:1.5}
@@ -42,12 +43,15 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--plum)}
 .login{max-width:360px;margin:12vh auto;padding:0 16px;text-align:center}
 .login .btn{width:100%;margin-top:8px}
 .err{color:#a33;font-size:.9rem;margin-top:8px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}.sgrid .card{margin:0}.big{font-size:1.7rem;font-weight:600;color:var(--plum)}
+.logo{width:150px;height:150px;border-radius:50%;display:block;margin:0 auto}
+.vh{position:absolute;left:-9999px}
 </style>
 </head>
 <body>
 
 <div class="login" id="login">
-  <h1>Shop with Bene</h1><p class="muted" style="margin-bottom:14px">Admin sign in</p>
+  <img class="logo" src="logo.jpeg" alt="Shop with Bene" style="width:120px;height:120px"><p class="muted" style="margin:10px 0 14px">Admin sign in</p>
   <input class="in" id="em" type="email" placeholder="Email" autocomplete="username">
   <input class="in" id="pw" type="password" placeholder="Password" autocomplete="current-password">
   <button class="btn" id="signin">Sign in</button><p class="err" id="err"></p>
@@ -57,12 +61,14 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--plum)}
   <div class="top"><h1 style="font-size:1.4rem">Shop with Bene</h1>
     <div class="row"><button class="btn alt" id="snd">Turn on alert sound</button><button class="btn alt" id="out">Sign out</button></div></div>
   <div class="wrap">
-    <div class="tabs"><button class="btn on" id="t1">Orders</button><button class="btn" id="t2">Bags</button></div>
+    <div class="tabs"><button class="btn on" id="t1">Orders</button><button class="btn" id="t2">Bags</button><button class="btn" id="t3">Sales</button></div>
 
     <section id="orders">
       <div class="row"><button class="btn alt" id="fo">Open orders</button><button class="btn alt" id="fd">Finished orders</button></div>
-      <p class="err" id="oerr"></p><div id="olist"></div>
+      <p class="muted" style="margin:8px 0">Finished orders stay here until you delete them.</p><p class="err" id="oerr"></p><div id="olist"></div>
     </section>
+
+    <section id="sales" hidden><div class="sgrid" id="sgrid"></div><p class="muted" style="margin-top:12px">Sales are counted when you tick Paid. They stay in your totals even if you delete the order, and come out only if you cancel a paid order.</p></section>
 
     <section id="bagsec" hidden>
       <div class="card"><h2 style="font-size:1.2rem">Add a bag</h2>
@@ -78,19 +84,19 @@ h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--plum)}
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import {getFirestore,collection,doc,onSnapshot,addDoc,updateDoc,deleteDoc,runTransaction,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import {firebaseConfig,SHOP} from './config.js';
+import {getFirestore,collection,doc,onSnapshot,addDoc,setDoc,updateDoc,deleteDoc,runTransaction,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {firebaseConfig,SHOP,orderCode,printReceipt} from './config.js';
 
 const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app);
 const $=s=>document.querySelector(s);
 const cur=n=>SHOP.currency+Number(n).toFixed(2).replace(/\.00$/,'');
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const OPEN=['awaiting_fee','fee_offered','awaiting_payment','payment_submitted','paid'];
-const LABEL={awaiting_fee:'Needs delivery fee',fee_offered:'Waiting for customer to accept fee',awaiting_payment:'Waiting for payment',payment_submitted:'Check payment',paid:'Paid, ready to serve',served:'Served',cancelled:'Cancelled'};
+const OPEN=['awaiting_fee','fee_offered','awaiting_payment','awaiting_pickup','payment_submitted','paid'];
+const LABEL={awaiting_fee:'Needs delivery fee',fee_offered:'Waiting for customer to accept fee',awaiting_payment:'Waiting for payment',awaiting_pickup:'Pay on pickup',payment_submitted:'Check payment',paid:'Paid, ready to serve',served:'Served',cancelled:'Cancelled'};
 const now=()=>Date.now()/1000;
 const ago=s=>{const m=Math.floor((now()-s)/60);return m<60?Math.max(m,0)+' min':m<1440?Math.floor(m/60)+' hours':Math.floor(m/1440)+' days'};
 
-let orders=[],products={},seen=null,unsubs=[],view='open';
+let orders=[],products={},sales=[],seen=null,unsubs=[],view='open';
 
 /* ----- Sound ----- */
 let ctx;
@@ -109,6 +115,7 @@ $('#out').onclick=()=>signOut(auth);
 
 function start(){
   seen=null;
+  unsubs.push(onSnapshot(collection(db,'sales'),s=>{sales=s.docs.map(d=>({id:d.id,...d.data()}));renderSales()}));
   unsubs.push(onSnapshot(collection(db,'orders'),s=>{
     orders=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||now())-(a.createdAt?.seconds||now()));
     const next={};let ring=false;
@@ -122,15 +129,25 @@ function start(){
 }
 
 /* ----- Tabs ----- */
-const tab=n=>{$('#orders').hidden=n!==1;$('#bagsec').hidden=n!==2;$('#t1').classList.toggle('on',n===1);$('#t2').classList.toggle('on',n===2)};
-$('#t1').onclick=()=>tab(1);$('#t2').onclick=()=>tab(2);
+const tab=n=>{$('#orders').hidden=n!==1;$('#bagsec').hidden=n!==2;$('#sales').hidden=n!==3;[1,2,3].forEach(i=>$('#t'+i).classList.toggle('on',n===i))};
+$('#t1').onclick=()=>tab(1);$('#t2').onclick=()=>tab(2);$('#t3').onclick=()=>tab(3);
 $('#fo').onclick=()=>{view='open';renderOrders()};$('#fd').onclick=()=>{view='done';renderOrders()};
+
+/* ----- Sales ----- */
+function renderSales(){
+  const n=new Date(), day=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  const wk=new Date(day); wk.setDate(day.getDate()-((day.getDay()+6)%7));
+  const mo=new Date(n.getFullYear(),n.getMonth(),1);
+  const sum=from=>{const l=sales.filter(x=>x.at&&x.at.seconds*1000>=from);return{n:l.length,t:l.reduce((a,x)=>a+x.amount,0)}};
+  $('#sgrid').innerHTML=[['Today',day],['This week',wk],['This month',mo],['All time',new Date(0)]].map(([l,f])=>{const r=sum(+f);
+    return `<div class="card"><div class="muted">${l}</div><div class="big">${cur(r.t)}</div><div class="muted">${r.n} order${r.n===1?'':'s'}</div></div>`}).join('');
+}
 
 /* ----- Orders ----- */
 const link=id=>new URL('./?order='+id,location.href).href;
 const waUrl=(o,txt)=>'https://wa.me/'+o.waPhone+'?text='+encodeURIComponent(txt);
 function msgFor(o){
-  const code=o.id.slice(0,6).toUpperCase();
+  const code=o.code||o.id.slice(0,6).toUpperCase();
   if(o.status==='fee_offered')return `Hello ${o.name}, thank you for ordering from Shop with Bene. Your delivery fee to ${o.location} is ${cur(o.deliveryFee)}. Please open your order to accept it: ${link(o.id)}`;
   return `Hello ${o.name}, this is Shop with Bene about your order ${code}. You can see it here: ${link(o.id)}`;
 }
@@ -141,12 +158,15 @@ function renderOrders(){
   const keep={};document.querySelectorAll('[data-fee]').forEach(i=>keep[i.dataset.fee]=i.value);
   $('#olist').innerHTML=list.length?list.map(o=>{
     const open=OPEN.includes(o.status), old=open&&o.status!=='paid'&&now()-(o.createdAt?.seconds||now())>86400;
-    const total=o.subtotal+(o.deliveryFee||0), code=o.id.slice(0,6).toUpperCase();
+    const total=o.subtotal+(o.deliveryFee||0), code=o.code||o.id.slice(0,6).toUpperCase();
     let a='';
     if(o.status==='awaiting_fee')a=`<input class="in" type="number" min="0" step="0.01" placeholder="Fee (GH₵)" data-fee="${o.id}" value="${esc(keep[o.id]||'')}"><button class="btn" data-sendfee="${o.id}">Send fee</button>`;
     if(o.status==='fee_offered')a=`<a class="btn alt" target="_blank" rel="noopener" href="${waUrl(o,msgFor(o))}">Message customer about fee</a>`;
     if(o.status==='payment_submitted'||o.status==='awaiting_payment')a=`<button class="btn" data-paid="${o.id}" ${o.status==='awaiting_payment'?'disabled title="Customer has not submitted a payment name yet"':''}>Mark paid ✓</button>`;
+    if(o.status==='awaiting_pickup')a=`<button class="btn" data-paid="${o.id}">Cash received, mark paid ✓</button>`;
     if(o.status==='paid')a=`<button class="btn" data-served="${o.id}">Mark served</button>`;
+    if(o.paid)a+=`<button class="btn alt" data-print="${o.id}">Print receipt</button>`;
+    if(!open)a+=`<button class="btn red" data-delorder="${o.id}">Delete</button>`;
     if(open)a+=`<button class="btn red" data-cancel="${o.id}">Cancel order</button>`;
     return `<div class="card ${old?'old':''}">
       <div class="row sp"><b>${esc(o.name)} · ${code}</b><span class="badge ${o.status==='payment_submitted'||o.status==='awaiting_fee'?'hot':''}">${LABEL[o.status]}</span></div>
@@ -163,6 +183,7 @@ async function restock(id,newStatus,by){
     const od=await t.get(ref),d=od.data();if(!OPEN.includes(d.status))return;
     const ps=await Promise.all(d.items.map(i=>t.get(doc(db,'products',i.productId))));
     ps.forEach((p,k)=>{if(p.exists())t.update(p.ref,{stock:p.data().stock+d.items[k].qty})});
+    t.delete(doc(db,'sales',id));
     t.update(ref,{status:newStatus,cancelledBy:by});
   });
 }
@@ -173,7 +194,9 @@ document.addEventListener('click',async e=>{
       if(!(v>=0))return alert('Enter the delivery fee first.');
       await updateDoc(doc(db,'orders',d.sendfee),{deliveryFee:v,status:'fee_offered'});
       const o=orders.find(x=>x.id===d.sendfee);if(o)window.open(waUrl(o,msgFor({...o,deliveryFee:v,status:'fee_offered'})),'_blank')}
-    if(d.paid)await updateDoc(doc(db,'orders',d.paid),{status:'paid',paid:true});
+    if(d.paid){const o=orders.find(x=>x.id===d.paid);await updateDoc(doc(db,'orders',d.paid),{status:'paid',paid:true,paidAt:serverTimestamp()});await setDoc(doc(db,'sales',d.paid),{amount:o.subtotal+(o.deliveryFee||0),code:o.code||d.paid.slice(0,6),at:serverTimestamp()})}
+    if(d.print){const o=orders.find(x=>x.id===d.print);if(o)printReceipt(o)}
+    if(d.delorder&&confirm('Delete this order for good? Your sales totals are kept.'))await deleteDoc(doc(db,'orders',d.delorder));
     if(d.served)await updateDoc(doc(db,'orders',d.served),{status:'served'});
     if(d.cancel&&confirm('Cancel this order and put the bags back in stock?'))await restock(d.cancel,'cancelled','admin');
     if(d.save){const p=parseFloat($('#p-'+d.save).value),s=parseInt($('#s-'+d.save).value,10);

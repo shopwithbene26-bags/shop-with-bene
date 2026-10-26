@@ -7,8 +7,9 @@
 <link rel="icon" href="logo.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
-:root{--ivory:#F8F1E5;--blush:#EBDCC3;--plum:#5E3B2A;--gold:#B08D4F;--ink:#2E2420;--line:#E6D7BE}
+:root{--ivory:#F8F1E5;--blush:#EBDCC3;--plum:#5E3B2A;--gold:#9C7A3C;--ink:#2E2420;--line:#E6D7BE}
 *{box-sizing:border-box;margin:0}
 [hidden]{display:none!important}
 body{font-family:Inter,system-ui,sans-serif;background:var(--ivory);color:var(--ink);line-height:1.5}
@@ -25,8 +26,6 @@ main{max-width:1000px;margin:0 auto;padding:20px 14px 30px}
 .sold{position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;font-size:.75rem;padding:3px 10px;border-radius:20px}
 .btn{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--plum);color:#fff;width:100%;margin-top:6px}
 .btn.alt{background:var(--blush);color:var(--plum)}
-.logo{width:150px;height:150px;border-radius:50%;display:block;margin:0 auto}
-.vh{position:absolute;left:-9999px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn:focus-visible,.in:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(92%,520px);background:var(--plum);color:#fff;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(94,59,42,.3)}
@@ -57,12 +56,68 @@ footer{text-align:center;padding:24px 16px 100px;border-top:1px solid var(--line
 footer .links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
 footer a{color:var(--plum);font-weight:600;text-decoration:none;border:1px solid var(--plum);border-radius:20px;padding:8px 14px}
 footer a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+header{padding:34px 16px 22px;background:linear-gradient(180deg,#fff,var(--ivory))}
+header h1{font-size:2.9rem;letter-spacing:.04em;line-height:1.1;font-weight:600}
+header p{letter-spacing:.32em;text-transform:uppercase;font-size:.72rem;margin-top:8px}
+header p::before,header p::after{content:"";display:inline-block;width:28px;height:1px;background:var(--gold);vertical-align:middle;margin:0 12px}
+h2{font-size:1.6rem}
+.card{border-radius:18px;transition:transform .25s,box-shadow .25s;animation:up .5s both;animation-delay:calc(var(--n,0)*60ms)}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(94,59,42,.14)}
+.card img{cursor:zoom-in;transition:transform .5s}
+.card:hover img{transform:scale(1.04)}
+.few{position:absolute;top:10px;left:10px;background:#fff;color:var(--plum);font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.bar.pulse{animation:pulse .45s}
+@keyframes pulse{40%{transform:translateX(-50%) scale(1.04)}}
+.toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:30px;font-size:.9rem;z-index:20}
+.toast.show{animation:tin .25s}
+@keyframes tin{from{opacity:0;transform:translate(-50%,-10px)}}
+.lb{position:fixed;inset:0;background:rgba(30,18,24,.88);display:flex;align-items:center;justify-content:center;z-index:30;padding:20px}
+.lb img{max-width:100%;max-height:90vh;border-radius:12px}
+.lb .x{position:absolute;top:14px;right:18px;color:#fff;font-size:1.6rem}
+.trk{display:flex;gap:4px;margin:16px 0}
+.st{flex:1;text-align:center;font-size:.72rem;color:#8a767c;position:relative}
+.st i{display:grid;place-items:center;width:28px;height:28px;margin:0 auto 6px;border-radius:50%;background:#fff;border:2px solid var(--line);font-style:normal;font-weight:600;position:relative;z-index:1}
+.st::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:2px;background:var(--line)}
+.st:first-child::before{display:none}
+.st.done i{background:var(--plum);border-color:var(--plum);color:#fff}
+.st.done::before,.st.now::before{background:var(--plum)}
+.st.now i{border-color:var(--plum);color:var(--plum)}
+.st.now,.st.done{color:var(--plum);font-weight:600}
+footer .links a{display:inline-flex;gap:8px;align-items:center}
+footer .links i{font-size:1.1rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.ribbon{background:linear-gradient(90deg,var(--plum),#8a5a44,var(--plum));color:#fff;text-align:center;font-size:.82rem;padding:8px 12px;letter-spacing:.03em}
+.hero{text-align:center;padding:22px 6px 8px}
+.hero h2{font-size:2.1rem;line-height:1.15}
+.hero>p{max-width:520px;margin:10px auto 0;color:#6b5a60}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px auto 6px;max-width:640px}
+.how div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 8px;display:flex;flex-direction:column;gap:3px;align-items:center;font-size:.8rem;color:#6b5a60}
+.how i{font-size:1.3rem;color:var(--plum);margin-bottom:4px}
+.how b{color:var(--ink);font-size:.9rem}
+.sec{text-align:center;margin:26px 0 16px;font-size:1.8rem}
+.sec::after{content:"";display:block;width:60px;height:2px;background:var(--gold);margin:8px auto 0}
+.wafab{position:fixed;right:16px;bottom:84px;width:52px;height:52px;border-radius:50%;background:#25D366;color:#fff;display:grid;place-items:center;font-size:1.7rem;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:4;text-decoration:none}
+@media(max-width:480px){.hero h2{font-size:1.7rem}.how{gap:6px}}
+.logo{width:150px;height:150px;border-radius:50%;display:block;margin:0 auto}
+.vh{position:absolute;left:-9999px}
 </style>
 </head>
 <body>
+<div class="ribbon">New bags every week &middot; Pickup at Dansoman-Asoredanho or delivery to your door</div>
 <header><img class="logo" src="logo.jpeg" alt="Shop with Bene"><h1 class="vh">Shop with Bene</h1></header>
 
-<main id="shop"><div class="grid" id="grid"></div></main>
+<main id="shop">
+  <section class="hero"><h2>Bags made for your moments</h2>
+    <p>Pick your favourite, order in minutes, and pay with MoMo. We'll keep you updated on WhatsApp every step of the way.</p>
+    <div class="how"><div><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i><b>Choose</b><span>Tap a photo to see it bigger</span></div>
+    <div><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><b>Order</b><span>Pickup or delivery</span></div>
+    <div><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i><b>Pay with MoMo</b><span>We confirm on WhatsApp</span></div></div></section>
+  <h2 class="sec">New arrivals</h2>
+  <div class="grid" id="grid"></div></main>
+<a class="wafab" id="wafab" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
 <button class="bar" id="bar" hidden></button>
 
 <div class="sheet" id="sheet" hidden>
@@ -75,13 +130,13 @@ footer a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
       <label><input type="radio" name="mode" value="delivery">Delivery</label>
     </div>
     <p class="note" id="pu"></p>
+    <div id="pm"><p class="note"><b>How would you like to pay?</b></p><div class="seg"><label><input type="radio" name="pay" value="momo" checked>MoMo</label><label><input type="radio" name="pay" value="cash">Pay on pickup</label></div></div>
     <input class="in" id="name" placeholder="Your name" autocomplete="name">
-    <input class="in" id="call" type="tel" placeholder="Phone number for calls" autocomplete="tel">
-    <label class="chk"><input type="checkbox" id="same" checked> My WhatsApp number is the same as my call number</label>
-    <input class="in" id="wa" type="tel" placeholder="Your WhatsApp number" hidden>
+    <input class="in" id="wa" type="tel" placeholder="Your WhatsApp number (required)" autocomplete="tel">
+    <input class="in" id="call" type="tel" placeholder="Call number (optional, if different)">
     <div id="dl" hidden>
       <input class="in" id="loc" placeholder="Your delivery location">
-      <p class="note">We'll set your delivery fee for this location, and you can accept or decline it before paying.</p>
+      <p class="note">We'll set your delivery fee for this location, and you can accept or decline it before paying. Delivery orders are paid by MoMo, because payment confirms your order.</p>
     </div>
     <button class="btn" id="place">Place order</button>
   </div>
@@ -90,10 +145,12 @@ footer a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <main id="order" hidden></main>
 <footer><p>Quality bags, classy styles, just for you.</p><div class="links" id="ft"></div></footer>
 
+<div class="lb" id="lb" hidden><button class="x" aria-label="Close">✕</button><img id="lbimg" alt="Bag"></div>
+<div class="toast" id="toast" hidden></div>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {getFirestore,collection,doc,onSnapshot,runTransaction,serverTimestamp,updateDoc} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import {firebaseConfig,SHOP} from './config.js';
+import {firebaseConfig,SHOP,orderCode,printReceipt} from './config.js';
 
 const db=getFirestore(initializeApp(firebaseConfig));
 const $=s=>document.querySelector(s);
@@ -110,9 +167,9 @@ const saveCart=()=>{try{localStorage.setItem('cart',JSON.stringify(cart))}catch(
 function renderShop(){
   const list=Object.entries(products).filter(([,p])=>!p.hidden)
     .sort((a,b)=>(b[1].createdAt?.seconds||0)-(a[1].createdAt?.seconds||0));
-  $('#grid').innerHTML=list.length?list.map(([id,p])=>`
-    <div class="card"><img src="${esc(p.imageUrl)}" alt="Bag" loading="lazy">
-    ${p.stock<1?'<span class="sold">Sold out</span>':''}
+  $('#grid').innerHTML=list.length?list.map(([id,p],n)=>`
+    <div class="card" style="--n:${n}"><img src="${esc(p.imageUrl)}" alt="Bag" loading="lazy" data-zoom>
+    ${p.stock<1?'<span class="sold">Sold out</span>':p.stock<=3?`<span class="few">Only ${p.stock} left</span>`:''}
     <div class="b"><div class="price">${cur(p.price)}</div>
     <button class="btn" data-add="${id}" ${p.stock<1?'disabled':''}>${p.stock<1?'Sold out':'Add to cart'}</button></div></div>`).join('')
     :'<p class="empty">New bags are on the way. Check back soon.</p>';
@@ -134,7 +191,8 @@ function renderCart(){
 }
 document.addEventListener('click',e=>{
   const t=e.target;
-  if(t.dataset.add){cart[t.dataset.add]=Math.min((cart[t.dataset.add]||0)+1,products[t.dataset.add].stock);saveCart();renderCart()}
+  if('zoom' in t.dataset){$('#lbimg').src=t.src;$('#lb').hidden=false}
+  if(t.dataset.add){cart[t.dataset.add]=Math.min((cart[t.dataset.add]||0)+1,products[t.dataset.add].stock);saveCart();renderCart();toast('Added to your cart');bump();t.textContent='Added ✓';setTimeout(()=>{t.textContent='Add to cart'},1200)}
   if(t.dataset.inc){cart[t.dataset.inc]=Math.min((cart[t.dataset.inc]||0)+1,products[t.dataset.inc].stock);saveCart();renderCart()}
   if(t.dataset.dec){cart[t.dataset.dec]=Math.max((cart[t.dataset.dec]||0)-1,0);if(!cart[t.dataset.dec])delete cart[t.dataset.dec];saveCart();renderCart()}
 });
@@ -142,14 +200,13 @@ $('#bar').onclick=()=>$('#sheet').hidden=false;
 $('#close').onclick=()=>$('#sheet').hidden=true;
 $('#pu').innerHTML=`Pick up at <b>${esc(SHOP.pickup)}</b>. Payment is by MoMo after you place your order.`;
 const mode=()=>document.querySelector('[name=mode]:checked').value;
-document.querySelectorAll('[name=mode]').forEach(r=>r.onchange=()=>{$('#dl').hidden=mode()!=='delivery';$('#pu').hidden=mode()!=='pickup'});
-$('#same').onchange=()=>$('#wa').hidden=$('#same').checked;
+document.querySelectorAll('[name=mode]').forEach(r=>r.onchange=()=>{$('#dl').hidden=mode()!=='delivery';$('#pu').hidden=mode()!=='pickup';$('#pm').hidden=mode()!=='pickup'});
 
 $('#place').onclick=async()=>{
-  const name=$('#name').value.trim(), call=$('#call').value.trim(), wa=$('#same').checked?call:$('#wa').value.trim(), loc=$('#loc').value.trim(), m=mode();
+  const name=$('#name').value.trim(), wa=$('#wa').value.trim(), call=$('#call').value.trim()||wa, loc=$('#loc').value.trim(), m=mode(), pay=m==='delivery'?'momo':document.querySelector('[name=pay]:checked').value;
   if(!name) return alert('Please enter your name.');
-  if(!okPhone(call)) return alert('Please enter a valid phone number for calls, like 0244123456.');
   if(!okPhone(wa)) return alert('Please enter a valid WhatsApp number, like 0244123456.');
+  if($('#call').value.trim()&&!okPhone(call)) return alert('Please enter a valid call number, like 0244123456, or leave it empty.');
   if(m==='delivery'&&!loc) return alert('Please enter your delivery location.');
   const ls=lines(); if(!ls.length) return;
   const btn=$('#place'); btn.disabled=true; btn.textContent='Placing order…';
@@ -163,7 +220,7 @@ $('#place').onclick=async()=>{
       });
       snaps.forEach((s,i)=>t.update(s.ref,{stock:s.data().stock-ls[i].q,lastOrderId:oref.id}));
       t.set(oref,{items,subtotal:items.reduce((a,i)=>a+i.price*i.qty,0),mode:m,name,callPhone:intl(call),waPhone:intl(wa),
-        location:m==='delivery'?loc:'',deliveryFee:null,status:m==='delivery'?'awaiting_fee':'awaiting_payment',
+        location:m==='delivery'?loc:'',deliveryFee:null,status:m==='delivery'?'awaiting_fee':pay==='cash'?'awaiting_pickup':'awaiting_payment',payMethod:pay,code:orderCode(name,oref.id),
         paid:false,momoName:'',itemQty:Object.fromEntries(items.map(i=>[i.productId,i.qty])),createdAt:serverTimestamp()});
     });
     cart={};saveCart();location.href='?order='+oref.id;
@@ -179,11 +236,15 @@ const sumHtml=o=>{
   ${o.mode==='delivery'?`<div class="tot"><span>Delivery to ${esc(o.location)}</span><span>${fee!=null?cur(fee):'To be confirmed'}</span></div>`:`<div class="tot"><span>Pickup</span><span>${esc(SHOP.pickup)}</span></div>`}
   ${o.mode==='pickup'||fee!=null?`<div class="tot"><span>Total to pay</span><span>${cur(o.subtotal+(fee||0))}</span></div>`:''}</div>`;
 };
+const STEPS={delivery:['Order placed','Delivery fee','Payment','Confirmed','Served'],pickup:['Order placed','Payment','Confirmed','Served']};
+const tracker=o=>{if(o.status==='cancelled')return'';const st=STEPS[o.mode],key={awaiting_fee:'Delivery fee',fee_offered:'Delivery fee',awaiting_payment:'Payment',payment_submitted:'Payment',awaiting_pickup:'Payment',paid:'Confirmed',served:'Served'}[o.status],cur=st.indexOf(key),all=o.status==='served';
+  return `<div class="trk">${st.map((x,i)=>{const d=all||i<cur;return `<div class="st ${d?'done':i===cur?'now':''}"><i>${d?'✓':i+1}</i><span>${x}</span></div>`}).join('')}</div>`};
 function renderOrder(id,o){
-  const ref=doc(db,'orders',id), total=o.subtotal+(o.deliveryFee||0), code=id.slice(0,6).toUpperCase();
+  const ref=doc(db,'orders',id), total=o.subtotal+(o.deliveryFee||0), code=o.code||id.slice(0,6).toUpperCase();
   const wa='https://wa.me/'+SHOP.whatsapp+'?text='+encodeURIComponent(`Hello Shop with Bene, this is my order ${code}.\n`+o.items.map(i=>`Bag ${cur(i.price)} × ${i.qty}`).join('\n')+`\nBags: ${cur(o.subtotal)}`+(o.mode==='delivery'?`\nDelivery to ${o.location}: ${o.deliveryFee!=null?cur(o.deliveryFee):'to be confirmed'}`:`\nPickup at ${SHOP.pickup}`)+`\nName: ${o.name}\nOrder link: ${location.href}`);
   let s='';
   if(o.status==='awaiting_fee') s=`<div class="msg"><b>Order received.</b> We're working out the delivery fee for ${esc(o.location)}. Keep this page open, or we'll message you on WhatsApp when it's ready.</div>`;
+  if(o.status==='awaiting_pickup') s=`<div class="msg"><b>Order received.</b> Please pay <b>${cur(total)}</b> when you collect your bag at ${esc(SHOP.pickup)}. We'll message you on WhatsApp when it's ready.</div>`;
   if(o.status==='fee_offered') s=`<div class="msg"><b>Your delivery fee is ${cur(o.deliveryFee)}.</b> Accept the delivery fee to go ahead with your order, or decline the fee to cancel the order and keep your items in your cart.</div>
     <button class="btn" id="acc">Accept fee and continue</button><button class="btn alt" id="dec">Decline fee and cancel order</button>`;
   if(o.status==='awaiting_payment') s=`<div class="box"><h2>Pay with MoMo</h2><p class="note">Send <b>${cur(total)}</b> to this number:</p>
@@ -195,9 +256,10 @@ function renderOrder(id,o){
   if(o.status==='paid') s=`<div class="msg"><b>Payment confirmed.</b> Your order is being prepared${o.mode==='delivery'?' for delivery':' for pickup'}.</div>`;
   if(o.status==='served') s=`<div class="msg"><b>Order complete.</b> Thank you for shopping with Bene.</div>`;
   if(o.status==='cancelled') s=`<div class="msg"><b>This order was cancelled.</b></div><a href="./"><button class="btn">Back to the shop</button></a>`;
-  $('#order').innerHTML=`<h2>Order ${code}</h2>${s}${sumHtml(o)}<a href="${wa}" target="_blank" rel="noopener"><button class="btn alt">Send order summary on WhatsApp</button></a>`;
+  $('#order').innerHTML=`<h2>Order ${code}</h2>${tracker(o)}${s}${sumHtml(o)}${o.paid?'<button class="btn" id="rcpt">Print receipt</button>':''}<a href="${wa}" target="_blank" rel="noopener"><button class="btn alt">Send order summary on WhatsApp</button></a>`;
   const on=(i,f)=>{const el=$('#'+i);if(el)el.onclick=f};
   on('cp',()=>{navigator.clipboard?.writeText(SHOP.momoNumber);$('#cp').textContent='Copied'});
+  on('rcpt',()=>printReceipt(o));
   on('acc',()=>updateDoc(ref,{status:'awaiting_payment'}));
   on('paid',()=>{const n=$('#mname').value.trim();if(!n)return alert('Please enter the name on the MoMo account you paid from.');updateDoc(ref,{momoName:n,status:'payment_submitted'})});
   on('dec',async()=>{
@@ -211,9 +273,17 @@ function renderOrder(id,o){
   });
 }
 
+/* ---------- Interactions ---------- */
+const toast=m=>{const t=$('#toast');t.textContent=m;t.hidden=false;t.classList.remove('show');void t.offsetWidth;t.classList.add('show');clearTimeout(toast.k);toast.k=setTimeout(()=>{t.hidden=true},1600)};
+const bump=()=>{const b=$('#bar');b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse')};
+$('#lb').onclick=()=>{$('#lb').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#lb').hidden=true;$('#sheet').hidden=true}});
+
+$('#wafab').href='https://wa.me/'+SHOP.whatsapp+'?text='+encodeURIComponent('Hello '+SHOP.name+', I have a question.');
+
 /* ---------- Footer ---------- */
 const local=n=>'0'+n.replace(/^233/,'');
-$('#ft').innerHTML=`<a href="https://wa.me/${SHOP.whatsapp}" target="_blank" rel="noopener">WhatsApp ${local(SHOP.whatsapp)}</a><a href="tel:+233${SHOP.callLine.slice(1)}">Call ${esc(SHOP.callLine)}</a><a href="https://www.snapchat.com/add/${esc(SHOP.snapchat)}" target="_blank" rel="noopener">Snapchat ${esc(SHOP.snapchat)}</a>`;
+$('#ft').innerHTML=`<a href="https://wa.me/${SHOP.whatsapp}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i>WhatsApp</a><a href="tel:+233${SHOP.callLine.slice(1)}"><i class="fa-solid fa-phone" aria-hidden="true"></i>${esc(SHOP.callLine)}</a><a href="https://www.snapchat.com/add/${esc(SHOP.snapchat)}" target="_blank" rel="noopener"><i class="fa-brands fa-snapchat" aria-hidden="true"></i>${esc(SHOP.snapchat)}</a>`;
 
 /* ---------- Start ---------- */
 if(oid){
